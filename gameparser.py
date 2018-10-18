@@ -3,7 +3,7 @@ import string
 # List of "unimportant" words (feel free to add more)
 skip_words = ['a', 'about', 'all', 'an', 'another', 'any', 'around', 'at',
               'bad', 'beautiful', 'been', 'better', 'big', 'can', 'every', 'for',
-              'from', 'good', 'go', 'have', 'her', 'here', 'hers', 'his', 'how',
+              'from', 'good', 'have', 'her', 'here', 'hers', 'his', 'how',
               'i', 'if', 'in', 'into', 'is', 'it', 'its', 'large', 'later',
               'like', 'little', 'main', 'me', 'mine', 'more', 'my', 'now',
               'of', 'off', 'oh', 'on', 'please', 'small', 'some', 'soon',
@@ -28,15 +28,14 @@ def filter_words(words, skip_words):
     ['go', 'passage', 'south']
 
     """
-    words.split()
-    filtered_words = ""
+    new_list = []
     for word in words:
-        if word not in filtered_words:
-            filtered_words = filtered_words + ch
+        if word not in skip_words:
+            new_list.append(word)
 
-    return filtered_words
+    return new_list
 
-    pass
+    #pass
 
     
 def remove_punct(text):
@@ -53,10 +52,10 @@ def remove_punct(text):
     'goSouTh'
     """
     no_punct = ""
+    text.replace("0","o")
     for char in text:
         if not (char in string.punctuation):
             no_punct = no_punct + char
-
     return no_punct
 
 
@@ -86,16 +85,9 @@ def normalise_input(user_input):
 
     """
     no_punct = remove_punct(user_input).lower()
-    # Remove punctuation and convert to lower case
-    punct = ",.<>?/~#'@;:}]{[+=_-()*&^%$£!1234567890¬`|"
-    for ch in text:
-        if ch not in punct:
-            no_punct = no_punct + ch
-
-    normalised_input = no_punct.strip(skip_words)
-    new_text = normalised_input.split
-    return new_text
+    no_punct = no_punct.split()
+    ans = filter_words(no_punct, skip_words)
+    return ans
 
     #
-    # COMPLETE ME!
-    #
+    # COMPLETE ME

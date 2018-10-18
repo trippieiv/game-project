@@ -24,8 +24,38 @@ def list_of_items(items):
     'money, a student handbook, laptop'
 
     """
+
+    all_items = []
+    for item in items:
+        all_items.append(item['name'])
+
+
+    display_items = ", ".join(all_items)
+    #print(display_items)
+    return display_items
+
     pass
 
+   #list_of_items([item_money, item_handbook, item_laptop])
+
+def mass_of_items(items):
+
+    total_mass = 0
+
+    for item in items:
+        total_mass = total_mass + item["mass"]
+
+    return total_mass
+
+def mass_check(item_id) :
+    global inventory
+
+    m = items[item_id]
+    if mass_of_items(inventory) + m["mass"] > 3.0 :
+        print("\nToo heavy")
+        return False
+    else:
+        return True
 
 def print_room_items(room):
     """This function takes a room as an input and nicely displays a list of items
@@ -49,6 +79,10 @@ def print_room_items(room):
     Note: <BLANKLINE> here means that doctest should expect a blank line.
 
     """
+    s = list_of_items(room["items"])
+    if len(room["items"]) > 0 :
+        print("There is " + s + " here.")
+        print()
     pass
 
 
@@ -62,6 +96,13 @@ def print_inventory_items(items):
     <BLANKLINE>
 
     """
+    global inventory
+    if len(inventory) > 0 :
+        a = "You have " + list_of_items(items) + "."
+        print(a)
+        print()
+    else :
+        print("Your inventory is empty")
     pass
 
 
@@ -111,6 +152,7 @@ def print_room(room):
 
     Note: <BLANKLINE> here means that doctest should expect a blank line.
     """
+
     # Display room name
     print()
     print(room["name"].upper())
@@ -118,6 +160,10 @@ def print_room(room):
     # Display room description
     print(room["description"])
     print()
+    # Display items in room
+    print_room_items(room)
+    # Display mass of items
+
 
     #
     # COMPLETE ME!
@@ -189,6 +235,20 @@ def print_menu(exits, room_items, inv_items):
     for direction in exits:
         # Print the exit name and where it leads to
         print_exit(direction, exit_leads_to(exits, direction))
+    # Pick up items
+    for item in room_items :
+        a = "TAKE " + (item["id"].upper()) + " to take " + (item["name"])
+        #b = "-Mass : " + str(item["mass"])
+        print(a)
+        #print(b)
+
+    # drop items
+    for item in inv_items:
+        a = "DROP " + (item["id"].upper()) + " to drop your " + (item["id"])
+        #b = "-Mass : " + str(item["mass"])
+        print(a)
+        #print(b)
+
 
     #
     # COMPLETE ME!
@@ -222,6 +282,11 @@ def execute_go(direction):
     (and prints the name of the room into which the player is
     moving). Otherwise, it prints "You cannot go there."
     """
+    global current_room
+    if is_valid_exit(current_room["exits"], direction) :
+        current_room = move(current_room["exits"],direction)
+    else :
+        print("You cannot go there")
     pass
 
 
@@ -231,15 +296,37 @@ def execute_take(item_id):
     there is no such item in the room, this function prints
     "You cannot take that."
     """
-    pass
-    
+    global inventory
+
+    if mass_check(item_id):
+        for item in current_room["items"]:
+            if item_id == item["id"]:
+                b = current_room["items"]
+                b.remove(item)
+                inventory.append(item)
+                print("You have successfully added " + item_id + " to your inventory.")
+                return
+    else:
+        pass
+
+    print("You cannot take that")
 
 def execute_drop(item_id):
     """This function takes an item_id as an argument and moves this item from the
     player's inventory to list of items in the current room. However, if there is
     no such item in the inventory, this function prints "You cannot drop that."
     """
-    pass
+    global inventory
+
+    for item in inventory:
+        if item["id"] == item_id:
+            inventory.remove(item)
+            current_room["items"].append(item)
+            print("You have removed " + item_id + " from your inventory.")
+            return
+
+    print("You cannot drop that")
+
     
 
 def execute_command(command):
@@ -260,19 +347,18 @@ def execute_command(command):
             print("Go where?")
 
     elif command[0] == "take":
-        if len(command) > 1:
+        if len(command) > 1 and command[1] in item :
             execute_take(command[1])
         else:
-            print("Take what?")
-
+            print("Take what?\n")
     elif command[0] == "drop":
-        if len(command) > 1:
+        if len(command) > 1 and command[1] in item :
             execute_drop(command[1])
         else:
-            print("Drop what?")
+            print("Drop what?\n")
 
     else:
-        print("This makes no sense.")
+        print("This makes no sense.\nTry Again....")
 
 
 def menu(exits, room_items, inv_items):
@@ -289,6 +375,8 @@ def menu(exits, room_items, inv_items):
 
     # Read player's input
     user_input = input("> ")
+    if user_input == str(-99):
+        quit()
 
     # Normalise the input
     normalised_user_input = normalise_input(user_input)
@@ -318,15 +406,29 @@ def main():
 
     # Main game loop
     while True:
-        # Display game status (room description, inventory etc.)
-        print_room(current_room)
-        print_inventory_items(inventory)
+        a = rooms["Reception"]
+        global inventory
 
-        # Show the menu with possible actions and ask the player
-        command = menu(current_room["exits"], current_room["items"], inventory)
+        if len(a["items"]) != len(items):
 
-        # Execute the player's command
-        execute_command(command)
+            # Display how to quit:
+            print("Enter -99 to quit the game")
+
+            # Display game status (room description, inventory etc.)
+            print_room(current_room)
+            print("Total mass in your inventory : " + str(mass_of_items(inventory)))
+            print("You can only carry 3 kg worth of items in your inventory..")
+            print_inventory_items(inventory)
+
+            # Show the menu with possible actions and ask the player
+            command = menu(current_room["exits"], current_room["items"], inventory)
+
+            # Execute the player's command
+            execute_command(command)
+        else:
+            print("CONGARTULATIONS!! YOU WON :) bye.")
+            break
+
 
 
 
